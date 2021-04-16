@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halo | Find your way</title>
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://maps.googleapis.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.6.19/dist/css/uikit.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.6.19/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.6.19/dist/js/uikit-icons.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDlu8i595y3DJT4943CTnSeyRVKJ9Vqv2Q&libraries=places"></script>
+    
+    <script src="app.js"></script>
+    <style type="text/css">
+        #map {
+            height: 400px;
+        }
+        #directions {
+          font-size: 12px;
+        }
+        html , body {
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px;
+            font-weight: 200;
+            letter-spacing: 0.25px;
+            height: 100%;
+            background: url(geometry.png);
+        }
+        img {
+          border: 1px solid #ececec;
+        }
+        .uk-input::placeholder {
+        font-weight: 300;
+        font-size: 14px;
+        letter-spacing: 0.25px;
+    }
+    </style>
+</head>
+<body>
+    <div class="uk-container">
+      <img class="uk-align-center uk-margin-large-top" data-src="logo.png" alt="Halo" uk-img>
+      <div class="uk-card uk-card-default uk-card-body uk-width-1-2@m uk-align-center">
+        <h3 class="uk-card-title">Where do you want to go?</h3>
+        <p>Tell us more about your journey - where is starts and ends, and we'll help you find your way.</p>
+        <form class="uk-form-stacked uk-width-1-1">
+          <div>
+              <label class="uk-form-label">Starting Address</label>
+              <div class="uk-form-controls">
+                <div class="uk-inline uk-width-1-1">
+                  <span class="uk-form-icon" uk-icon="icon: home"></span>
+                  <input type="text" class="uk-input" id="origin" placeholder="Enter starting address">
+                </div>
+              </div>
+          </div>
+          <div class="uk-margin-small-top">
+              <div class="uk-form-label">Destination Address</div>
+              <div class="uk-form-controls">
+                <div class="uk-inline uk-width-1-1">
+                  <span class="uk-form-icon" uk-icon="icon: location"></span>
+                  <input type="text" class="uk-input" id="destination" placeholder="Enter destination address">
+                </div>
+              </div>
+          </div>
+          <div hidden id="invalidAddress" class="uk-alert-danger" uk-alert>
+            <a class="uk-alert-close" uk-close></a>
+            <p>Looks like either your destination or starting address is invalid. Please enter a valid address by selecting the most relevant option in the autocomplete lists.</p>
+          </div>
+          <a class="uk-button uk-button-secondary uk-margin-small-top" id="showRoute" uk-scroll>View Route</a>
+      </form>
+      </div>
+      <div id="journey" hidden class="uk-card uk-card-default uk-card-body uk-width-1-2@m uk-align-center uk-margin-large-bottom">
+        <h3 class="uk-card-title">Your Journey</h3>
+        <div id="map" class="uk-width-1-1"></div>
+        <ul id="details" class="uk-list uk-list-disc uk-list-muted"></ul>
+        <button id="btnViewDirections" class="uk-button uk-button-secondary" type="button" uk-toggle="target: #offcanvas-overlay">View Directions</button>
+        <div id="offcanvas-overlay" uk-offcanvas="overlay: true">
+            <div class="uk-offcanvas-bar">
+                <button class="uk-offcanvas-close" type="button" uk-close></button>
+                <h3>DIRECTIONS</h3>
+                <hr class="uk-divider-small">
+                <ul id="directions"class="uk-list uk-list-striped"></ul>
+            </div>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+      let trip = {};
+      let validGeolocation = true;
+      let destination = document.getElementById('destination');
+      let origin = document.getElementById('origin');
+      let journey = document.getElementById('journey');
+      let details = document.getElementById('details');
+      let directions = document.getElementById('directions');
+      let btnShowRoute = document.getElementById('showRoute');
+
+      const CLIENT_ID = '1983eef6-ae57-4bdd-82a9-64bf48faf286';
+      const CLIENT_SECRET = 'hCVdB4FF6kLbNjLWdxeya7ygzv1OKBmAGwgYXANVHPE=';
+      const TOKEN_ENDPOINT = 'https://identity.whereismytransport.com/connect/token';
+      const JOURNEY_ENDPOINT = 'https://platform.whereismytransport.com/api/journeys';
+
+      geolocate(origin, 'origin');
+      geolocate(destination, 'destination');
+
+      btnShowRoute.addEventListener('click', function() {
+        if(trip.origin == undefined || trip.destination == undefined) {
+          validGeolocation = false;
+        }
+
+        if(validForm()) {
+          getJourney();
+          showRoute();
+        }
+      });
+</script>
+</body>
+</html>
